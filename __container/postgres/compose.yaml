@@ -1,0 +1,33 @@
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: mldm_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mldm
+      POSTGRES_PASSWORD: mldm
+      POSTGRES_DB: mldm
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mldm -d mldm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:9.5
+    container_name: mldm_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - ./data_pgadmin:/var/lib/pgadmin
+    depends_on:
+      - postgres

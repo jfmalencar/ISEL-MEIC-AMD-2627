@@ -1,0 +1,37 @@
+COMMAND: C:\ISEL\1_Semestre\AMD\Pratica\mLDm_MoP_workspace\__venv\Scripts\python.exe -c 
+import importlib
+
+package_list = [
+   ( "numpy", "numpy" ),
+   ( "pandas", "pandas" ),
+   ( "duckdb", "duckdb" ),
+   ( "psycopg", "psycopg" ),
+   ( "sklearn", "scikit-learn" ),
+   ( "matplotlib", "matplotlib" ),
+   ( "plotly", "plotly" ),
+   ( "jupyterlab", "jupyterlab" ),
+   ( "ipykernel", "ipykernel" ),
+   ( "ipywidgets", "ipywidgets" )
+]
+
+for module_name, package_name in package_list:
+   module = importlib.import_module( module_name )
+   version = getattr( module, "__version__", "version-not-available" )
+   print( f"PTS | mLDm | {package_name}: {version}" )
+
+RETURN_CODE: 0
+
+STDOUT:
+PTS | mLDm | numpy: 2.5.1
+PTS | mLDm | pandas: 3.0.3
+PTS | mLDm | duckdb: 1.5.4
+PTS | mLDm | psycopg: 3.3.4
+PTS | mLDm | scikit-learn: 1.9.0
+PTS | mLDm | matplotlib: 3.11.0
+PTS | mLDm | plotly: 6.9.0
+PTS | mLDm | jupyterlab: 4.6.1
+PTS | mLDm | ipykernel: 7.3.0
+PTS | mLDm | ipywidgets: 8.1.8
+
+STDERR:
+

@@ -1,0 +1,37 @@
+COMMAND: C:\ISEL\1_Semestre\AMD\Pratica\mLDm_MoP_workspace\__venv\Scripts\python.exe -c 
+import psycopg
+
+connection = psycopg.connect(
+   host = "localhost",
+   port = 5432,
+   dbname = "mldm",
+   user = "mldm",
+   password = "mldm",
+   connect_timeout = 5
+)
+
+with connection:
+   with connection.cursor() as cursor:
+      cursor.execute(
+         '''
+         SELECT
+            current_database(),
+            current_user,
+            version();
+         '''
+      )
+      database_name, user_name, postgres_version = cursor.fetchone()
+
+      print( f"database: {database_name}" )
+      print( f"user: {user_name}" )
+      print( f"version: {postgres_version}" )
+
+RETURN_CODE: 0
+
+STDOUT:
+database: mldm
+user: mldm
+version: PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+
+STDERR:
+

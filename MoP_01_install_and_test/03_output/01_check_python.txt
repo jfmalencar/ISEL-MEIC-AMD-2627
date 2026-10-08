@@ -1,0 +1,16 @@
+system_python: C:\ISEL\1_Semestre\AMD\Pratica\mLDm_MoP_workspace\__venv\Scripts\python.exe
+system_python_version: 3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]
+platform: Windows-11-10.0.26300-SP0
+mop_path: C:\ISEL\1_Semestre\AMD\Pratica\mLDm_MoP_workspace\MoP_01_install_and_test
+workspace_path: C:\ISEL\1_Semestre\AMD\Pratica\mLDm_MoP_workspace
+venv_path: C:\ISEL\1_Semestre\AMD\Pratica\mLDm_MoP_workspace\__venv
+venv_python_path: C:\ISEL\1_Semestre\AMD\Pratica\mLDm_MoP_workspace\__venv\Scripts\python.exe
+
+COMMAND: C:\ISEL\1_Semestre\AMD\Pratica\mLDm_MoP_workspace\__venv\Scripts\python.exe --version
+RETURN_CODE: 0
+
+STDOUT:
+Python 3.14.3
+
+STDERR:
+

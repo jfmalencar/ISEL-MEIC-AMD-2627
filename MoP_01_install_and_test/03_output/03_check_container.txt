@@ -1,0 +1,34 @@
+PTS | mLDm | checking container tool: docker
+
+COMMAND: C:\Program Files\Docker\Docker\resources\bin\docker.EXE --version
+RETURN_CODE: 0
+
+STDOUT:
+Docker version 29.8.0, build 88096ef
+
+STDERR:
+
+
+COMMAND: C:\Program Files\Docker\Docker\resources\bin\docker.EXE compose version
+RETURN_CODE: 0
+
+STDOUT:
+Docker Compose version v5.5.1
+
+STDERR:
+
+
+COMMAND: C:\Program Files\Docker\Docker\resources\bin\docker.EXE ps
+RETURN_CODE: 0
+
+STDOUT:
+CONTAINER ID   IMAGE                COMMAND                  CREATED       STATUS                             PORTS                                         NAMES
+7e43247b2c8a   dpage/pgadmin4:9.5   "/entrypoint.sh"         7 hours ago   Up 9 seconds                       0.0.0.0:5050->80/tcp, [::]:5050->80/tcp       mldm_pgadmin
+14c31ce3f8e5   postgres:16          "docker-entrypoint.sâ€¦"   7 hours ago   Up 10 seconds (health: starting)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp   mldm_postgres
+
+STDERR:
+
+
+PTS | mLDm | container-tool-ok: docker
+
+PTS | mLDm | at least one container tool is available
