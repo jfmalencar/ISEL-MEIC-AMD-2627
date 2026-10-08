@@ -1,0 +1,13 @@
+# PTS | mLDm | MoP_02 | submission requirements
+
+[TO_ADAPT]
+_mLDm_00_penguins_db_boot.py
+_mLDm_01_penguins_integration.ipynb
+_mLDm_02_penguins_completion.ipynb
+
+[TO_CREATE]
+penguins_visual_check.ows
+
+[OTHER]
+04_report/penguins_ER_model.pdf
+04_report/penguins_orange_evidence.png
