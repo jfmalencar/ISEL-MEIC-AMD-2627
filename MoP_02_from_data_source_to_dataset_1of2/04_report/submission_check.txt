@@ -1,0 +1,24 @@
+PTS | mLDm | submission check
+
+MoP: MoP_02_from_data_source_to_dataset_1of2
+requirements: 01_input/_mLDm_xx_submission_requirements.txt
+
+[TO_ADAPT]
+[OK] _mLDm_00_penguins_db_boot.py -> 00_penguins_db_boot.py
+[OK] _mLDm_01_penguins_integration.ipynb -> 01_penguins_integration.ipynb
+[OK] _mLDm_02_penguins_completion.ipynb -> 02_penguins_completion.ipynb
+
+[TO_CREATE]
+[OK] 02_code/penguins_visual_check.ows
+
+[OTHER]
+[OK] 04_report/penguins_ER_model.pdf
+[OK] 04_report/penguins_orange_evidence.png
+
+summary:
+required: 6
+found: 6
+missing: 0
+configuration-errors: 0
+
+STATUS: OK
