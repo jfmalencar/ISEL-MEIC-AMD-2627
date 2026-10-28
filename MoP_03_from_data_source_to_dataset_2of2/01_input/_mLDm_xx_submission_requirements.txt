@@ -1,0 +1,10 @@
+[TO_ADAPT]
+02_code/_mLDm_03_penguins_analysis.ipynb
+02_code/_mLDm_04_penguins_dataset.ipynb
+
+[TO_CREATE]
+
+[OTHER]
+01_input/_mLDm_00_penguins_data_collected.csv
+02_code/penguins_visual_check.ows
+03_output/penguins_analytical_dataset.csv
