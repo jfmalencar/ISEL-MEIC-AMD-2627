@@ -1,0 +1,23 @@
+PTS | mLDm | submission check
+
+MoP: MoP_03_from_data_source_to_dataset_2of2
+requirements: 01_input/_mLDm_xx_submission_requirements.txt
+
+[TO_ADAPT]
+[OK] 02_code/_mLDm_03_penguins_analysis.ipynb -> 02_code/03_penguins_analysis.ipynb
+[OK] 02_code/_mLDm_04_penguins_dataset.ipynb -> 02_code/04_penguins_dataset.ipynb
+
+[TO_CREATE]
+
+[OTHER]
+[OK] 01_input/_mLDm_00_penguins_data_collected.csv
+[OK] 02_code/penguins_visual_check.ows
+[OK] 03_output/penguins_analytical_dataset.csv
+
+summary:
+required: 5
+found: 5
+missing: 0
+configuration-errors: 0
+
+STATUS: OK
