@@ -5,7 +5,7 @@ BANNER = \
 # PTS | Paulo Trigo Silva
 # mLDm | MoP
 # submission tool
-# v03
+# v04
 # ----------------------------------------------------------------------
 """
 
@@ -38,14 +38,20 @@ REQUIREMENT_SECTION_NAMES = [
 
 EXCLUDE_FOLDER_NAMES = {
    "__pycache__",
-   ".ipynb_checkpoints"
+   ".ipynb_checkpoints",
+   "__MACOSX"
 }
 
 EXCLUDE_FILE_PATTERNS = [
    ".DS_Store",
+   "._*",
    "Thumbs.db",
+   "desktop.ini",
    "*.pyc",
    "*.pyo",
+   "*~",
+   "*.swp",
+   "*.swo",
    "submitted_*.zip"
 ]
 
@@ -177,7 +183,7 @@ def parse_arguments( context ):
    if context[ "mode" ] == "mop_code":
       if len( argument_list ) != 1:
          raise_error(
-            "usage-from-MoP-02_code: "
+            "usage-from-02_code-folder: "
             "python3 _mLDm_xx_build_submission_zip.py <group-number>" )
 
       group_label = normalize_group_argument( argument_list[ 0 ] )
@@ -189,7 +195,8 @@ def parse_arguments( context ):
       if len( argument_list ) != 2:
          raise_error(
             "usage-from-workspace: "
-            "python3 _mLDm_xx_build_submission_zip.py <group-number> <MoP-folder-name>" )
+            "python3 _mLDm_xx_build_submission_zip.py "
+            "<group-number> <MoP-folder-name>" )
 
       group_label = normalize_group_argument( argument_list[ 0 ] )
       mop_path = get_mop_path_from_argument(
@@ -247,6 +254,20 @@ def get_relative_path( path_text, context_label ):
    return relative_path
 
 
+def is_resolved_path_inside_folder( path, folder_path ):
+   try:
+      path.resolve().relative_to( folder_path.resolve() )
+      return True
+   except ValueError:
+      return False
+
+
+def validate_path_inside_mop( path, mop_path, relative_path ):
+   if not is_resolved_path_inside_folder( path, mop_path ):
+      raise_error(
+         f"path-resolves-outside-MoP: {relative_path.as_posix()}" )
+
+
 def get_requirements_file_path( mop_path ):
    return mop_path / FOLDER_NAME_INPUT / REQUIREMENTS_FILE_NAME
 
@@ -267,6 +288,7 @@ def read_submission_requirements( mop_path ):
       for section_name in REQUIREMENT_SECTION_NAMES
    }
 
+   requirement_section_by_path = {}
    current_section_name = None
 
    for line_number, raw_line in enumerate(
@@ -297,10 +319,15 @@ def read_submission_requirements( mop_path ):
          line,
          f"line-{line_number}" )
 
-      if relative_path in requirement_map[ current_section_name ]:
-         raise_error(
-            f"duplicate-requirement-at-line-{line_number}: {line}" )
+      normalized_key = relative_path.as_posix()
 
+      if normalized_key in requirement_section_by_path:
+         previous_section_name = requirement_section_by_path[ normalized_key ]
+         raise_error(
+            f"duplicate-requirement-at-line-{line_number}: {line} "
+            f"| already-declared-in={previous_section_name}" )
+
+      requirement_section_by_path[ normalized_key ] = current_section_name
       requirement_map[ current_section_name ].append( relative_path )
 
    return requirements_file_path, requirement_map
@@ -324,14 +351,62 @@ def get_adapted_relative_path( original_relative_path ):
    return original_relative_path.with_name( adapted_name )
 
 
+def path_name_matches_pattern( name, pattern ):
+   return fnmatch.fnmatchcase( name.casefold(), pattern.casefold() )
+
+
+def should_exclude_path( relative_path ):
+   excluded_folder_name_set = {
+      folder_name.casefold()
+      for folder_name in EXCLUDE_FOLDER_NAMES
+   }
+
+   if any(
+      part.casefold() in excluded_folder_name_set
+      for part in relative_path.parts
+   ):
+      return True
+
+   for pattern in EXCLUDE_FILE_PATTERNS:
+      if path_name_matches_pattern( relative_path.name, pattern ):
+         return True
+
+   return False
+
+
+def register_submission_path(
+   section_name,
+   requirement_relative_path,
+   submission_relative_path,
+   submission_owner_map
+):
+   submission_key = submission_relative_path.as_posix()
+
+   if submission_key in submission_owner_map:
+      previous_section_name, previous_requirement_path = \
+         submission_owner_map[ submission_key ]
+
+      return (
+         False,
+         f"submission-path-conflict: {submission_key} "
+         f"| already-selected-by={previous_section_name}:"
+         f"{previous_requirement_path.as_posix()} "
+         f"| current={section_name}:"
+         f"{requirement_relative_path.as_posix()}"
+      )
+
+   submission_owner_map[ submission_key ] = (
+      section_name,
+      requirement_relative_path
+   )
+
+   return True, None
+
+
 def validate_submission_requirements( mop_path, requirement_map ):
-   code_path = mop_path / FOLDER_NAME_CODE
-
-   validate_required_folder( code_path )
-
    check_line_list = []
-   code_path_list = []
-   other_path_list = []
+   selected_path_list = []
+   submission_owner_map = {}
 
    required_count = 0
    found_count = 0
@@ -352,26 +427,60 @@ def validate_submission_requirements( mop_path, requirement_map ):
             f"[ERROR] {original_relative_path.as_posix()} | {error}" )
          continue
 
-      original_path = code_path / original_relative_path
-      adapted_path = code_path / adapted_relative_path
+      if should_exclude_path( adapted_relative_path ):
+         configuration_error_count = configuration_error_count + 1
+         check_line_list.append(
+            f"[ERROR] requirement-matches-excluded-technical-path: "
+            f"{adapted_relative_path.as_posix()}" )
+         continue
+
+      registered, conflict_message = register_submission_path(
+         "TO_ADAPT",
+         original_relative_path,
+         adapted_relative_path,
+         submission_owner_map )
+
+      if not registered:
+         configuration_error_count = configuration_error_count + 1
+         check_line_list.append( f"[ERROR] {conflict_message}" )
+         continue
+
+      original_path = mop_path / original_relative_path
+      adapted_path = mop_path / adapted_relative_path
+
+      try:
+         validate_path_inside_mop(
+            original_path,
+            mop_path,
+            original_relative_path )
+         validate_path_inside_mop(
+            adapted_path,
+            mop_path,
+            adapted_relative_path )
+      except Exception as error:
+         configuration_error_count = configuration_error_count + 1
+         check_line_list.append(
+            f"[ERROR] {original_relative_path.as_posix()} | {error}" )
+         continue
 
       if not original_path.exists() or not original_path.is_file():
          configuration_error_count = configuration_error_count + 1
          check_line_list.append(
-            f"[ERROR] source-not-found: "
-            f"02_code/{original_relative_path.as_posix()}" )
+            f"[ERROR] source-not-found-or-not-file: "
+            f"{original_relative_path.as_posix()}" )
+         continue
 
       if adapted_path.exists() and adapted_path.is_file():
          found_count = found_count + 1
-         code_path_list.append(
-            ( adapted_path, Path( FOLDER_NAME_CODE ) / adapted_relative_path ) )
+         selected_path_list.append(
+            ( adapted_path, adapted_relative_path ) )
          check_line_list.append(
             f"[OK] {original_relative_path.as_posix()} "
             f"-> {adapted_relative_path.as_posix()}" )
       else:
          missing_count = missing_count + 1
          check_line_list.append(
-            f"[MISSING] 02_code/{adapted_relative_path.as_posix()}" )
+            f"[MISSING] {adapted_relative_path.as_posix()}" )
 
    check_line_list.append( "" )
    check_line_list.append( "[TO_CREATE]" )
@@ -386,29 +495,88 @@ def validate_submission_requirements( mop_path, requirement_map ):
             f"{created_relative_path.as_posix()}" )
          continue
 
-      created_path = code_path / created_relative_path
+      if should_exclude_path( created_relative_path ):
+         configuration_error_count = configuration_error_count + 1
+         check_line_list.append(
+            f"[ERROR] requirement-matches-excluded-technical-path: "
+            f"{created_relative_path.as_posix()}" )
+         continue
+
+      registered, conflict_message = register_submission_path(
+         "TO_CREATE",
+         created_relative_path,
+         created_relative_path,
+         submission_owner_map )
+
+      if not registered:
+         configuration_error_count = configuration_error_count + 1
+         check_line_list.append( f"[ERROR] {conflict_message}" )
+         continue
+
+      created_path = mop_path / created_relative_path
+
+      try:
+         validate_path_inside_mop(
+            created_path,
+            mop_path,
+            created_relative_path )
+      except Exception as error:
+         configuration_error_count = configuration_error_count + 1
+         check_line_list.append(
+            f"[ERROR] {created_relative_path.as_posix()} | {error}" )
+         continue
 
       if created_path.exists():
          found_count = found_count + 1
-         code_path_list.append(
-            ( created_path, Path( FOLDER_NAME_CODE ) / created_relative_path ) )
+         selected_path_list.append(
+            ( created_path, created_relative_path ) )
          check_line_list.append(
-            f"[OK] 02_code/{created_relative_path.as_posix()}" )
+            f"[OK] {created_relative_path.as_posix()}" )
       else:
          missing_count = missing_count + 1
          check_line_list.append(
-            f"[MISSING] 02_code/{created_relative_path.as_posix()}" )
+            f"[MISSING] {created_relative_path.as_posix()}" )
 
    check_line_list.append( "" )
    check_line_list.append( "[OTHER]" )
 
    for other_relative_path in requirement_map[ "OTHER" ]:
       required_count = required_count + 1
+
+      if should_exclude_path( other_relative_path ):
+         configuration_error_count = configuration_error_count + 1
+         check_line_list.append(
+            f"[ERROR] requirement-matches-excluded-technical-path: "
+            f"{other_relative_path.as_posix()}" )
+         continue
+
+      registered, conflict_message = register_submission_path(
+         "OTHER",
+         other_relative_path,
+         other_relative_path,
+         submission_owner_map )
+
+      if not registered:
+         configuration_error_count = configuration_error_count + 1
+         check_line_list.append( f"[ERROR] {conflict_message}" )
+         continue
+
       other_path = mop_path / other_relative_path
+
+      try:
+         validate_path_inside_mop(
+            other_path,
+            mop_path,
+            other_relative_path )
+      except Exception as error:
+         configuration_error_count = configuration_error_count + 1
+         check_line_list.append(
+            f"[ERROR] {other_relative_path.as_posix()} | {error}" )
+         continue
 
       if other_path.exists():
          found_count = found_count + 1
-         other_path_list.append(
+         selected_path_list.append(
             ( other_path, other_relative_path ) )
          check_line_list.append(
             f"[OK] {other_relative_path.as_posix()}" )
@@ -427,8 +595,7 @@ def validate_submission_requirements( mop_path, requirement_map ):
       "missing_count": missing_count,
       "configuration_error_count": configuration_error_count,
       "check_line_list": check_line_list,
-      "code_path_list": code_path_list,
-      "other_path_list": other_path_list
+      "selected_path_list": selected_path_list
    }
 
 
@@ -501,17 +668,6 @@ def write_submission_check_error( mop_path, error_message ):
 
 
 # ----------------------------------------------------------------------
-def should_exclude_path( relative_path ):
-   if any( part in EXCLUDE_FOLDER_NAMES for part in relative_path.parts ):
-      return True
-
-   for pattern in EXCLUDE_FILE_PATTERNS:
-      if fnmatch.fnmatch( relative_path.name, pattern ):
-         return True
-
-   return False
-
-
 def write_zip_entry(
    zip_file,
    source_path,
@@ -539,6 +695,9 @@ def add_path_to_zip(
    added_archive_name_set,
    apply_exclusions_to_children = True
 ):
+   if should_exclude_path( archive_path ):
+      return 0
+
    file_count = write_zip_entry(
       zip_file,
       source_path,
@@ -550,12 +709,11 @@ def add_path_to_zip(
 
    for child_path in sorted( source_path.rglob( "*" ) ):
       child_relative_path = child_path.relative_to( source_path )
+      child_archive_path = archive_path / child_relative_path
 
       if apply_exclusions_to_children and should_exclude_path(
-         child_relative_path ):
+         child_archive_path ):
          continue
-
-      child_archive_path = archive_path / child_relative_path
 
       file_count = file_count + write_zip_entry(
          zip_file,
@@ -580,14 +738,6 @@ def add_folder_to_zip(
       apply_exclusions_to_children = True )
 
 
-def is_path_inside_folder( path, folder_path ):
-   try:
-      path.relative_to( folder_path )
-      return True
-   except ValueError:
-      return False
-
-
 # ----------------------------------------------------------------------
 def get_submission_zip_path( workspace_path, mop_path, group_label ):
    zip_file_name = f"{ZIP_PREFIX}_{group_label}_{mop_path.name}.zip"
@@ -606,11 +756,9 @@ def build_submission_zip(
    group_label,
    validation_result
 ):
-   code_path = mop_path / FOLDER_NAME_CODE
    output_path = mop_path / FOLDER_NAME_OUTPUT
    report_path = mop_path / FOLDER_NAME_REPORT
 
-   validate_required_folder( code_path )
    validate_required_folder( output_path )
    validate_required_folder( report_path )
 
@@ -624,9 +772,9 @@ def build_submission_zip(
       zip_file_path.unlink()
 
    print_info( f"zip-target-folder: {workspace_path}" )
-   print_info( f"adding-folder: {FOLDER_NAME_CODE} (selected files only)" )
-   print_info( f"adding-folder: {FOLDER_NAME_OUTPUT}" )
-   print_info( f"adding-folder: {FOLDER_NAME_REPORT}" )
+   print_info( "adding-required-artefacts: selected paths" )
+   print_info( f"adding-folder: {FOLDER_NAME_OUTPUT} (complete)" )
+   print_info( f"adding-folder: {FOLDER_NAME_REPORT} (complete)" )
 
    with zipfile.ZipFile(
       zip_file_path,
@@ -636,13 +784,7 @@ def build_submission_zip(
       added_archive_name_set = set()
       total_file_count = 0
 
-      total_file_count = total_file_count + write_zip_entry(
-         zip_file,
-         code_path,
-         Path( FOLDER_NAME_CODE ),
-         added_archive_name_set )
-
-      for source_path, archive_path in validation_result[ "code_path_list" ]:
+      for source_path, archive_path in validation_result[ "selected_path_list" ]:
          total_file_count = total_file_count + add_path_to_zip(
             zip_file,
             source_path,
@@ -661,27 +803,6 @@ def build_submission_zip(
          report_path,
          FOLDER_NAME_REPORT,
          added_archive_name_set )
-
-      for source_path, archive_path in validation_result[ "other_path_list" ]:
-         if is_path_inside_folder( source_path, output_path ):
-            continue
-
-         if is_path_inside_folder( source_path, report_path ):
-            continue
-
-         already_selected_in_code = any(
-            selected_source_path == source_path
-            for selected_source_path, _ in validation_result[ "code_path_list" ] )
-
-         if already_selected_in_code:
-            continue
-
-         total_file_count = total_file_count + add_path_to_zip(
-            zip_file,
-            source_path,
-            archive_path,
-            added_archive_name_set,
-            apply_exclusions_to_children = True )
 
    print_info( f"submission-created: {zip_file_path}" )
    print_info( f"submission-file-count: {total_file_count}" )
@@ -702,6 +823,7 @@ def main():
 
       workspace_path = context[ "workspace_path" ]
 
+      print( BANNER )
       print_info( f"workspace-detected: {workspace_path}" )
       print_info( f"mop-detected: {mop_path}" )
       print_info( f"group-detected: {group_label}" )
