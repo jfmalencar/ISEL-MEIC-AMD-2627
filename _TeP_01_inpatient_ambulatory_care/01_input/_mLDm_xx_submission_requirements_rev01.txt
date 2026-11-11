@@ -1,0 +1,25 @@
+# PTS | MLDM | TeP_01 — Inpatient and Ambulatory Care Prediction
+# Submission requirements | rev01
+# Install as: 01_input/_mLDm_xx_submission_requirements_rev01.txt
+# Use with: 02_code/_mLDm_xx_build_submission_zip_rev01.py
+#
+# [TO_ADAPT] requires the completed copy without the "_mLDm_" prefix.
+# [TO_EXIST] requires local availability, without ZIP inclusion.
+# [TO_ZIP] selects the ZIP contents, including all developed code in 02_code.
+# The generated 04_report/submission_check.txt is included automatically.
+
+[TO_ADAPT]
+02_code/_mLDm_00_sns_selected_solutions.ipynb
+
+[TO_EXIST]
+03_output/sns_analytical_dataset.csv
+
+[TO_ZIP]
+02_code/
+02_code/01_sns_build_modelling_datasets.ipynb
+02_code/02_deployed_predictors.py
+03_output/sns_deployed_models.joblib
+03_output/sns_integration_check.csv
+03_output/_mLDm_00_sns_data_C_prediction.csv
+04_report/report.pdf
+04_report/README.txt
