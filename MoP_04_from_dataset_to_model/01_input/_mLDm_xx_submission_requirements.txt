@@ -1,0 +1,45 @@
+# PTS | mLDm | MoP_04 | From Dataset to Model
+# minimum required submission artefacts
+# paths are relative to the MoP_04 folder
+# outputs not listed here are still included from 03_output by the ZIP tool v04
+
+[TO_ADAPT]
+02_code/_mLDm_01_penguins_feature_representation.ipynb
+02_code/_mLDm_02_penguins_modelling.ipynb
+02_code/_mLDm_03_penguins_selection_deployment.ipynb
+
+[TO_CREATE]
+02_code/penguins_OHE_comparison.ows
+02_code/penguins_learners_comparison.ows
+
+[OTHER]
+# modelling datasets: five prediction scenarios and A_noOHE (CSV)
+03_output/penguins_modelling_A_study.csv
+03_output/penguins_modelling_B_anywhere.csv
+03_output/penguins_modelling_C_whenever.csv
+03_output/penguins_modelling_D_biological.csv
+03_output/penguins_modelling_E_morphological.csv
+03_output/penguins_modelling_A_study_noOHE.csv
+
+# modelling datasets for Orange Data Mining (TAB)
+03_output/penguins_modelling_A_study.tab
+03_output/penguins_modelling_B_anywhere.tab
+03_output/penguins_modelling_C_whenever.tab
+03_output/penguins_modelling_D_biological.tab
+03_output/penguins_modelling_E_morphological.tab
+03_output/penguins_modelling_A_study_noOHE.tab
+
+# fitted feature transformers (JOBLIB)
+03_output/penguins_modelling_A_study.joblib
+03_output/penguins_modelling_B_anywhere.joblib
+03_output/penguins_modelling_C_whenever.joblib
+03_output/penguins_modelling_D_biological.joblib
+03_output/penguins_modelling_E_morphological.joblib
+
+# final classifier and deployment data
+03_output/_deploy_penguins_model.joblib
+03_output/__deploy_penguins_new_observations.csv
+03_output/__deploy_penguins_predictions.csv
+
+# conditional: _deploy_penguins_scaler.joblib is created only when scaling
+# is selected; it is included automatically in the ZIP when it exists
