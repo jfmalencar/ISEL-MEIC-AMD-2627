@@ -1,0 +1,43 @@
+PTS | mLDm | submission check
+
+MoP: MoP_04_from_dataset_to_model
+requirements: 01_input/_mLDm_xx_submission_requirements.txt
+
+[TO_ADAPT]
+[OK] 02_code/_mLDm_01_penguins_feature_representation.ipynb -> 02_code/01_penguins_feature_representation.ipynb
+[OK] 02_code/_mLDm_02_penguins_modelling.ipynb -> 02_code/02_penguins_modelling.ipynb
+[OK] 02_code/_mLDm_03_penguins_selection_deployment.ipynb -> 02_code/03_penguins_selection_deployment.ipynb
+
+[TO_CREATE]
+[OK] 02_code/penguins_OHE_comparison.ows
+[OK] 02_code/penguins_learners_comparison.ows
+
+[OTHER]
+[OK] 03_output/penguins_modelling_A_study.csv
+[OK] 03_output/penguins_modelling_B_anywhere.csv
+[OK] 03_output/penguins_modelling_C_whenever.csv
+[OK] 03_output/penguins_modelling_D_biological.csv
+[OK] 03_output/penguins_modelling_E_morphological.csv
+[OK] 03_output/penguins_modelling_A_study_noOHE.csv
+[OK] 03_output/penguins_modelling_A_study.tab
+[OK] 03_output/penguins_modelling_B_anywhere.tab
+[OK] 03_output/penguins_modelling_C_whenever.tab
+[OK] 03_output/penguins_modelling_D_biological.tab
+[OK] 03_output/penguins_modelling_E_morphological.tab
+[OK] 03_output/penguins_modelling_A_study_noOHE.tab
+[OK] 03_output/penguins_modelling_A_study.joblib
+[OK] 03_output/penguins_modelling_B_anywhere.joblib
+[OK] 03_output/penguins_modelling_C_whenever.joblib
+[OK] 03_output/penguins_modelling_D_biological.joblib
+[OK] 03_output/penguins_modelling_E_morphological.joblib
+[OK] 03_output/_deploy_penguins_model.joblib
+[OK] 03_output/__deploy_penguins_new_observations.csv
+[OK] 03_output/__deploy_penguins_predictions.csv
+
+summary:
+required: 25
+found: 25
+missing: 0
+configuration-errors: 0
+
+STATUS: OK

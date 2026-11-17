@@ -1,0 +1,3 @@
+body_mass_g,sex,flipper_length_mm,bill_depth_mm,bill_length_mm,year,island,predicted_species
+3800,FEMALE,195,17.5,42.0,2008,Dream,Adelie
+4700,MALE,210,16.2,47.5,2009,Biscoe,Gentoo
